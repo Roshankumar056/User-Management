@@ -82,15 +82,26 @@ export const filterByFilters = (users, filters) => {
  */
 export const sortUsers = (users, field, direction) => {
   if (!field) return users;
+
   return [...users].sort((a, b) => {
-    const valA = String(getNestedValue(a, field) ?? '').toLowerCase();
-    const valB = String(getNestedValue(b, field) ?? '').toLowerCase();
+    let valA = getNestedValue(a, field);
+    let valB = getNestedValue(b, field);
+
+    if (field === 'id') {
+      return direction === 'asc'
+        ? Number(valA) - Number(valB)
+        : Number(valB) - Number(valA);
+    }
+
+    valA = String(valA ?? '').toLowerCase();
+    valB = String(valB ?? '').toLowerCase();
+
     if (valA < valB) return direction === 'asc' ? -1 : 1;
     if (valA > valB) return direction === 'asc' ? 1 : -1;
+
     return 0;
   });
 };
-
 /**
  * Slice a user array for the current pagination page.
  * @param {User[]} users

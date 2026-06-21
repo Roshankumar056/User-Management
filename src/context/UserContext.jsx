@@ -91,17 +91,20 @@ export const UserProvider = ({ children }) => {
   }, []);
 
   /** Add a new user. On success, optimistically update local state. */
-  const addUser = useCallback(async (userData) => {
-    const created = await createUser(userData);
-    // JSONPlaceholder always returns id=11; use a timestamp to keep IDs unique locally
-    const localUser = {
-      ...userData,
-      id: Date.now(),
-      company: { name: userData.department },
-    };
-    dispatch({ type: ACTIONS.ADD_USER, payload: localUser });
-    return localUser;
-  }, []);
+const addUser = useCallback(async (userData) => {
+  await createUser(userData);
+
+  const nextId = Math.max(...state.users.map(user => user.id), 0) + 1;
+
+  const localUser = {
+    ...userData,
+    id: nextId,
+    company: { name: userData.department },
+  };
+
+  dispatch({ type: ACTIONS.ADD_USER, payload: localUser });
+  return localUser;
+}, [state.users]);
 
   /** Edit an existing user in place. */
   const editUser = useCallback(async (id, userData) => {
